@@ -1,0 +1,24 @@
+{
+  "name": "mineflayer-blockFinder",
+  "version": "0.0.0",
+  "description": "mineflayer plugin which gives bots a function to find the nearest block",
+  "main": "index.js",
+  "scripts": {
+    "test": "node examples/diamondFinder.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Darthfett/mineflayer-blockFinder.git"
+  },
+  "keywords": [
+    "minecraft",
+    "mineflayer",
+    "bot",
+    "block",
+    "finder"
+  ],
+  "author": "Darthfett",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "gitHead": "a2f8d6963512aa00d0dc4693badb74fa908976b4"
+}
