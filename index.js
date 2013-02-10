@@ -4,6 +4,8 @@ var vec3;
 
 function init(mineflayer) {
 
+    vec3 = mineflayer.vec3;
+
     function inject(bot) {
 
         var unit = [
@@ -80,8 +82,8 @@ function init(mineflayer) {
                     for (var apothem = apoth; apothem <= max_apothem; apothem++) {
                         for (var side = s; side < 6; side++) {
                             var max = zeroed[side].scaled(2 * apothem);
-                            if (max.y > 127) {
-                                max.y = 127;
+                            if (max.y > 255) {
+                                max.y = 255;
                             } else if (max.y < 0) {
                                 max.y = 0;
                             }
@@ -103,7 +105,8 @@ function init(mineflayer) {
                                         }
                                         var offset = pt.minus(max.scaled(0.5).floored()).plus(unit[side].scaled(apothem));
                                         var abs_coords = point.plus(offset);
-                                        if (predicate(bot.blockAt(abs_coords))) {
+                                        var block = bot.blockAt(abs_coords);
+                                        if (predicate(block)) {
                                             result.push(abs_coords);
                                             if (result.length >= count) {
                                                 return callback(null, result);
@@ -160,8 +163,8 @@ function init(mineflayer) {
             for (var apothem = 1; apothem <= max_apothem; apothem++) {
                 for (var side = 0; side < 6; side++) {
                     var max = zeroed[side].scaled(2 * apothem);
-                    if (max.y > 127) {
-                        max.y = 127;
+                    if (max.y > 255) {
+                        max.y = 255;
                     } else if (max.y < 0) {
                         max.y = 0;
                     }
@@ -183,5 +186,6 @@ function init(mineflayer) {
             }
             return result;
         }
+    }
     return inject;
 }
