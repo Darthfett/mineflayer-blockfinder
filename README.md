@@ -1,4 +1,4 @@
-# mineflayer-blockFinder
+# mineflayer-blockfinder
 
 A library to help your mineflayer bot find blocks in the 3D world.
 
@@ -8,7 +8,7 @@ See [mineflayer](https://github.com/superjoe30/mineflayer/).
 
 ```js
 var mineflayer = require('mineflayer');
-var blockFinderPlugin = require('mineflayer-blockFinder')(mineflayer);
+var blockFinderPlugin = require('mineflayer-blockfinder')(mineflayer);
 var bot = mineflayer.createBot({username: 'Player'});
 
 // Install the plugin

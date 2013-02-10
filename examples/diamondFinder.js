@@ -1,5 +1,5 @@
 var mineflayer = require('mineflayer');
-var blockFinderPlugin = require('mineflayer-blockFinder')(mineflayer);
+var blockFinderPlugin = require('mineflayer-blockfinder')(mineflayer);
 var bot = mineflayer.createBot({username: 'Player'});
 
 // Install the plugin

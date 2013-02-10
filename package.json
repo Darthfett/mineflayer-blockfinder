@@ -1,5 +1,5 @@
 {
-  "name": "mineflayer-blockFinder",
+  "name": "mineflayer-blockfinder",
   "version": "0.0.0",
   "description": "mineflayer plugin which gives bots a function to find the nearest block",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Darthfett/mineflayer-blockFinder.git"
+    "url": "https://github.com/Darthfett/mineflayer-blockfinder.git"
   },
   "keywords": [
     "minecraft",
