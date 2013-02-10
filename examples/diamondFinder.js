@@ -21,7 +21,7 @@ bot.once('spawn', function() {
       bot.quit('quitting');
       return;
     } else {
-      bot.chat('I couldn't find any Diamond Ore blocks within 256');
+      bot.chat("I couldn't find any Diamond Ore blocks within 256.");
       bot.quit('quitting');
       return;
     }
