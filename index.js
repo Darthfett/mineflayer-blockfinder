@@ -1,4 +1,5 @@
 var assert = require('assert');
+var fs = require('fs');
 
 module.exports = init;
 
@@ -58,7 +59,7 @@ function init(mineflayer) {
         function BlockIterator(center) {
             this.center = center.floored();
             this.closedSet = { // All blocks that are this.distance blocks away
-                center: center,
+                center: this.center,
             };
             this.openSet = {}; // When a block in the closedSet is checked, its adjacent neighbors are added to the openSet (the ones that do not lead back to the center).
             this.distance = 0;
@@ -80,18 +81,19 @@ function init(mineflayer) {
             delete this.closedSet[key];
             if (point == null) {
                 // Should never happen
+                assert(false);
                 return null;
             }
 
             // Add all adjacent blocks that do not lead back to center to the open set
-            var distanceSigned = vec3Sign(point.minus(this.center).floored());
+            var distanceSigned = vec3Sign(point.minus(this.center));
             var directions = newBlockMap[distanceSigned];
             for (var i = 0; i < directions.length; i++) {
                 var offset = point.plus(directions[i]);
                 if (offset.y < 0 || offset.y > 255) continue;
                 this.openSet[offset] = offset;
             }
-            return point.floored();
+            return point;
         }
 
         function createBlockTypeMatcher(blockType) {
@@ -178,6 +180,7 @@ function init(mineflayer) {
                         lastTick = new Date();
                         next();
                     });
+                    return;
                 } else {
                     next();
                 }
