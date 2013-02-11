@@ -1,5 +1,8 @@
+var assert = require('assert');
+
 module.exports = init;
 
+var MAX_CPU_SPIN = 100;
 var vec3;
 
 function init(mineflayer) {
@@ -8,183 +11,177 @@ function init(mineflayer) {
 
     function inject(bot) {
 
-        var unit = [
-            vec3(-1,  0,  0),
-            vec3( 1,  0,  0),
-            vec3( 0,  1,  0),
-            vec3( 0, -1,  0),
-            vec3( 0,  0,  1),
-            vec3( 0,  0, -1),
-        ];
+        var newBlockMap = {};
 
-        var zeroed = [
-            vec3(0, 1, 1),
-            vec3(0, 1, 1),
-            vec3(1, 0, 1),
-            vec3(1, 0, 1),
-            vec3(1, 1, 0),
-            vec3(1, 1, 0),
-        ];
+        for (var x = -1; x <= 1; x++) {
+            for (var y = -1; y <= 1; y++) {
+                for (var z = -1; z <= 1; z++) {
+                    var directions = [];
+                    if (x) {
+                        directions.push(vec3(x, 0, 0));
+                    } else {
+                        directions.push(vec3(1, 0, 0));
+                        directions.push(vec3(-1, 0, 0));
+                    }
+                    if (y) {
+                        directions.push(vec3(0, y, 0));
+                    } else {
+                        directions.push(vec3(0, 1, 0));
+                        directions.push(vec3(0, -1, 0));
+                    }
+                    if (z) {
+                        directions.push(vec3(0, 0, z));
+                    } else {
+                        directions.push(vec3(0, 0, 1));
+                        directions.push(vec3(0, 0, -1));
+                    }
+                    newBlockMap[vec3(x, y, z)] = directions;
+                }
+            }
+        }
+
+        function vec3Sign(vec) {
+            var x = vec.x,
+                y = vec.y,
+                z = vec.z;
+
+            if (x < 0) x = -1;
+            else if (x > 0) x = 1;
+            if (y < 0) y = -1;
+            else if (y > 0) y = 1;
+            if (z < 0) z = -1;
+            else if (z > 0) z = 1;
+
+            return vec3(x, y, z);
+        }
+
+        function BlockIterator(center) {
+            this.center = center.floored();
+            this.closedSet = { // All blocks that are this.distance blocks away
+                center: center,
+            };
+            this.openSet = {}; // When a block in the closedSet is checked, its adjacent neighbors are added to the openSet (the ones that do not lead back to the center).
+            this.distance = 0;
+        }
+
+        BlockIterator.prototype.next = function() {
+            // Get first item in closedSet
+            for (var key in this.closedSet) break;
+
+            if (key == null) {
+                // We have exhausted all blocks within this.distance of this.center.
+                this.closedSet = this.openSet;
+                this.openSet = {};
+                for (key in this.closedSet) break;
+                this.distance++;
+            }
+
+            var point = this.closedSet[key];
+            delete this.closedSet[key];
+            if (point == null) {
+                // Should never happen
+                return null;
+            }
+
+            // Add all adjacent blocks that do not lead back to center to the open set
+            var distanceSigned = vec3Sign(point.minus(this.center).floored());
+            var directions = newBlockMap[distanceSigned];
+            for (var i = 0; i < directions.length; i++) {
+                var offset = point.plus(directions[i]);
+                if (offset.y < 0 || offset.y > 255) continue;
+                this.openSet[offset] = offset;
+            }
+            return point.floored();
+        }
+
+        function createBlockTypeMatcher(blockType) {
+            return function(block) {
+                return block == null ? false : blockType === block.type;
+            };
+        }
+
+        function createBlockArrayMatcher(blockArray) {
+            return function(block) {
+                return block == null ? false : blockArray.index(block.type) !== -1;
+            };
+        }
+
+        function createBlockMapMatcher(blockTypeMap) {
+            return function(block) {
+                return block == null ? false : blockTypeMap[block.type];
+            };
+        }
+
+        function predicateFromMatching(matching) {
+            if (typeof(matching) === 'number') {
+                return createBlockTypeMatcher(matching)
+            } else if (typeof(matching) === 'function') {
+                return matching;
+            } else if (Array.isArray(matching)) {
+                return createBlockArrayMatcher(matching);
+            } else if (typeof(matching) === 'object') {
+                return createBlockMapMatcher(matching);
+            } else {
+                // programmer error. crash loudly and proudly
+                throw new Error("Block Finder: Unknown value for matching: " + matching);
+            }
+        }
+
+        function optionsWithDefaults(options) {
+            assert.notEqual(options.matching, null);
+            assert.notEqual(options.point, null);
+            return {
+                point: options.point,
+                matching: options.matching,
+                count: options.count == null ? 1 : options.count,
+                maxDistance: options.maxDistance == null ? 64 : options.maxDistance,
+                predicate: predicateFromMatching(options.matching),
+            };
+        }
 
         bot.findBlock = findBlock;
         bot.findBlockSync = findBlockSync;
 
-        function findBlock(point, matching, options, callback) {
-            process.nextTick(function() {
-                if (options == null) {
-                    options = {};
-                }
-                var max_apothem = (options.radius == null) ? 64 : options.radius;
-                var count = options.count;
-                if (count == null) {
-                    count = 1;
-                }
-                var predicate;
-                if (typeof(matching) === 'number') {
-                    predicate = function(block) {
-                        if (block == null) {
-                            return false;
-                        }
-                        return matching === block.type;
-                    }
-                } else if (typeof(matching) === 'function') {
-                    predicate = matching;
-                } else if (Array.isArray(matching)) {
-                    // Assuming list
-                    var matching_set = {};
-                    for (var i = 0; i < matching.length; i++) {
-                        matching_set[matching[i].id] = true;
-                    }
-                    predicate = function(block) {
-                      return block == null ? false : matching_set[block.type];
-                    }
-                } else {
-                    return callback('Block Finder: Unknown value for matching: ' + matching, []);
-                }
+        function findBlockSync(options) {
+            options = optionsWithDefaults(options);
 
-                var result = [];
-                if (predicate(bot.blockAt(point))) {
-                    result.push(point);
-                    if (count <= 1) {
-                        return callback(null, result);
-                    }
-                }
+            var it = new BlockIterator(options.point);
+            var result = [];
 
-                var pt = vec3(0, 0, 0);
-                var t1 = new Date();
-                var apoth = 1;
-                var s = 0;
-                var x = 0,
-                    y = 0,
-                    z = 0;
+            while (result.length < options.count && it.distance <= options.maxDistance) {
+                var block = bot.blockAt(it.next());
+                if (options.predicate(block)) result.push(block);
+            }
 
-                (function startSearch() {
-                    for (var apothem = apoth; apothem <= max_apothem; apothem++) {
-                        for (var side = s; side < 6; side++) {
-                            var max = zeroed[side].scaled(2 * apothem);
-                            if (max.y > 255) {
-                                max.y = 255;
-                            } else if (max.y < 0) {
-                                max.y = 0;
-                            }
-                            for (pt.x = x; pt.x <= max.x; pt.x++) {
-                                for (pt.y = y; pt.y <= max.y; pt.y++) {
-                                    for (pt.z = z; pt.z <= max.z; pt.z++) {
-                                        var t2 = new Date();
-                                        if (t2 - t1 > 250) {
-                                            process.nextTick(function() {
-                                                apoth = apothem;
-                                                s = side;
-                                                x = pt.x;
-                                                y = pt.y;
-                                                z = pt.z;
-                                                t1 = new Date();
-                                                startSearch();
-                                            });
-                                            return;
-                                        }
-                                        var offset = pt.minus(max.scaled(0.5).floored()).plus(unit[side].scaled(apothem));
-                                        var abs_coords = point.plus(offset);
-                                        var block = bot.blockAt(abs_coords);
-                                        if (predicate(block)) {
-                                            result.push(abs_coords);
-                                            if (result.length >= count) {
-                                                return callback(null, result);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return callback(null, result);
-                })();
-            });
+            return result;
         }
 
-        function findBlockSync(point, matching, radius, count) {
-            var max_apothem = (radius == null) ? 64 : radius;
-            if (count == null) {
-                count = 1;
-            }
-            var predicate;
-            if (typeof(matching) === 'number') {
-                predicate = function(block) {
-                    if (block == null) {
-                        return false;
-                    }
-                    return matching === block.type;
-                }
-            } else if (typeof(matching) === 'function') {
-                predicate = matching;
-            } else if (Array.isArray(matching)) {
-                // Assuming list
-                var matching_set = {};
-                for (var i = 0; i < matching.length; i++) {
-                    matching_set[matching[i].id] = true;
-                }
-                predicate = function(block) {
-                  return block == null ? false : matching_set[block.type];
-                }
-            } else {
-                console.log('Block Finder: Unknown value for matching: ' + matching);
-                return [];
-            }
+        function findBlock(options, callback) {
+            options = optionsWithDefaults(options);
 
+            var it = new BlockIterator(options.point);
             var result = [];
-            if (predicate(bot.blockAt(point))) {
-                result.push(point);
-                if (count <= 1) {
-                    return result;
-                }
-            }
+            var lastTick = new Date();
 
-            var pt = vec3(0, 0, 0);
-            for (var apothem = 1; apothem <= max_apothem; apothem++) {
-                for (var side = 0; side < 6; side++) {
-                    var max = zeroed[side].scaled(2 * apothem);
-                    if (max.y > 255) {
-                        max.y = 255;
-                    } else if (max.y < 0) {
-                        max.y = 0;
-                    }
-                    for (pt.x = 0; pt.x <= max.x; pt.x++) {
-                        for (pt.y = 0; pt.y <= max.y; pt.y++) {
-                            for (pt.z = 0; pt.z <= max.z; pt.z++) {
-                                var offset = pt.minus(max.scaled(0.5).floored()).plus(unit[side].scaled(apothem));
-                                var abs_coords = point.plus(offset);
-                                if (predicate(bot.blockAt(abs_coords))) {
-                                    result.push(abs_coords);
-                                    if (result.length >= count) {
-                                        return result;
-                                    }
-                                }
-                            }
-                        }
-                    }
+            next();
+
+            function next() {
+                if (result.length >= options.count || it.distance > options.maxDistance) {
+                    return callback(null, result);
+                }
+
+                var block = bot.blockAt(it.next());
+                if (options.predicate(block)) result.push(block);
+                var cpuSpinTime = new Date() - lastTick;
+                if (cpuSpinTime > MAX_CPU_SPIN) {
+                    process.nextTick(function() {
+                        lastTick = new Date();
+                        next();
+                    });
+                } else {
+                    next();
                 }
             }
-            return result;
         }
     }
     return inject;

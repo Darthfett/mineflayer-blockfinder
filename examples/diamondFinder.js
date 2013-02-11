@@ -7,8 +7,10 @@ blockFinderPlugin(bot);
 
 // Sample usage
 bot.once('spawn', function() {
-  bot.findBlock(bot.entity.position, 56, {
-    radius: 256,
+  bot.findBlock({
+    point: bot.entity.position,
+    matching: 56,
+    maxDistance: 256,
     count: 1,
   }, function(err, blockPoints) {
     if (err) {

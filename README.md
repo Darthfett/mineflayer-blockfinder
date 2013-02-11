@@ -16,8 +16,10 @@ blockFinderPlugin(bot);
 
 // Sample usage
 bot.once('spawn', function() {
-  bot.findBlock(bot.entity.position, 56, {
-    radius: 256,
+  bot.findBlock({
+    point: bot.entity.position,
+    matching: 56,
+    maxDistance: 256,
     count: 1,
   }, function(err, blockPoints) {
     if (err) {
@@ -40,13 +42,13 @@ bot.once('spawn', function() {
 
 ## Documentation
 
-### bot.findBlock(point, blockMatchType, options, callback)
+### bot.findBlock(options, callback)
 
 Finds the nearest block(s) to the given point.
- * `point` - The start position of the search.
- * `blockMatchType` - A function that returns true if the given block is a match.  Also supports this value being a block id or array of block ids.
  * `options` - Additional options for the search:
-   - `radius` - The radius of the search, defaults to 64.
+   - `point` - The start position of the search.
+   - `blockMatchType` - A function that returns true if the given block is a match.  Also supports this value being a block id or array of block ids.
+   - `maxDistance` - The furthest distance for the search, defaults to 64.
    - `count` - The number of blocks to find at most, defaults to 1.
  * `callback` - A callback function to get the result.  Function signature:
 
@@ -54,8 +56,7 @@ Finds the nearest block(s) to the given point.
 function(err, arrayOfPoints)
 ```
 
-### bot.findBlockSync(point, blockMatchType, [radius], [count])
+### bot.findBlockSync(options)
 
 Finds the nearest block(s) to the given point synchronously.
-
-See `bot.findBlock`.
+ * `options` - See `bot.findBlock`.
