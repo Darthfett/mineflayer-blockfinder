@@ -63,6 +63,10 @@ Finds the nearest block(s) to the given point synchronously.
 
 ## History
 
+### 0.0.3
+
+ * Fix 'matching' option to allow for array of ids instead of crashing.
+
 ### 0.0.2
 
  * Refactored algorithm to use an Iterator approach, to allow for re-useable code.
