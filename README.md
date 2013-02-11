@@ -47,7 +47,7 @@ bot.once('spawn', function() {
 Finds the nearest block(s) to the given point.
  * `options` - Additional options for the search:
    - `point` - The start position of the search.
-   - `blockMatchType` - A function that returns true if the given block is a match.  Also supports this value being a block id or array of block ids.
+   - `matching` - A function that returns true if the given block is a match.  Also supports this value being a block id or array of block ids.
    - `maxDistance` - The furthest distance for the search, defaults to 64.
    - `count` - The number of blocks to find at most, defaults to 1.
  * `callback` - A callback function to get the result.  Function signature:
@@ -60,3 +60,11 @@ function(err, arrayOfPoints)
 
 Finds the nearest block(s) to the given point synchronously.
  * `options` - See `bot.findBlock`.
+
+## History
+
+### 0.0.2
+
+ * Refactored algorithm to use an Iterator approach, to allow for re-useable code.
+ * Rewrote block finding algorithm to guarantee the closest block is always found first.
+ * Matching argument now takes an array of block ids, instead of block enums.

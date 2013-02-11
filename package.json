@@ -1,6 +1,6 @@
 {
   "name": "mineflayer-blockfinder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "mineflayer plugin which gives bots a function to find the nearest block",
   "main": "index.js",
   "scripts": {
