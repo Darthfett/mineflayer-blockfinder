@@ -102,7 +102,7 @@ function init(mineflayer) {
 
         function createBlockArrayMatcher(blockArray) {
             return function(block) {
-                return block == null ? false : blockArray.index(block.type) !== -1;
+                return block == null ? false : blockArray.indexOf(block.type) !== -1;
             };
         }
 
