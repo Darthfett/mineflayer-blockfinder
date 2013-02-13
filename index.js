@@ -12,6 +12,67 @@ function init(mineflayer) {
 
     function inject(bot) {
 
+        var unit = [
+            vec3(-1,  0,  0),
+            vec3( 1,  0,  0),
+            vec3( 0,  1,  0),
+            vec3( 0, -1,  0),
+            vec3( 0,  0,  1),
+            vec3( 0,  0, -1),
+        ];
+
+        var zeroed = [
+            vec3(0, 1, 1),
+            vec3(0, 1, 1),
+            vec3(1, 0, 1),
+            vec3(1, 0, 1),
+            vec3(1, 1, 0),
+            vec3(1, 1, 0),
+        ];
+
+        function CubeIterator(center) {
+            this.center = center.floored();
+            this.apothem = 1;
+            this.side = 0;
+            this.point = vec3(0, 0, -1);
+            this.max = zeroed[this.side].scaled(2 * this.apothem);
+            if (this.max.y > 255) {
+                this.max.y = 255;
+            } else if (this.max.y < 0) {
+                this.max.y = 0;
+            }
+        }
+
+        CubeIterator.prototype.next = function() {
+            this.point.z += 1;
+            if (this.point.z > this.max.z) {
+                this.point.z = 0;
+                this.point.y += 1;
+                if (this.point.y > this.max.y) {
+                    this.point.y = 0;
+                    this.point.x += 1
+                    if (this.point.x > this.max.x) {
+                        this.point.x = 0;
+                        this.side += 1;
+                        if (this.side >= 6) {
+                            this.side = 0;
+                            this.apothem += 1;
+                        }
+                        this.max = zeroed[this.side].scaled(2 * this.apothem);
+                        if (this.max.y > 255) {
+                            this.max.y = 255;
+                        } else if (this.max.y < 0) {
+                            this.max.y = 0;
+                        }
+                    }
+                }
+            }
+            var offset = this.point.minus(this.max.scaled(0.5).floored()).plus(unit[this.side].scaled(this.apothem));
+            var abs_coords = this.center.plus(offset);
+            return abs_coords;
+
+        }
+
         var newBlockMap = {};
 
         for (var x = -1; x <= 1; x++) {
@@ -56,7 +117,7 @@ function init(mineflayer) {
             return vec3(x, y, z);
         }
 
-        function BlockIterator(center) {
+        function NeighborIterator(center) {
             this.center = center.floored();
             this.closedSet = { // All blocks that are this.distance blocks away
                 center: this.center,
@@ -65,7 +126,7 @@ function init(mineflayer) {
             this.distance = 0;
         }
 
-        BlockIterator.prototype.next = function() {
+        NeighborIterator.prototype.next = function() {
             // Get first item in closedSet
             for (var key in this.closedSet) break;
 
@@ -147,10 +208,10 @@ function init(mineflayer) {
         function findBlockSync(options) {
             options = optionsWithDefaults(options);
 
-            var it = new BlockIterator(options.point);
+            var it = new CubeIterator(options.point);
             var result = [];
 
-            while (result.length < options.count && it.distance <= options.maxDistance) {
+            while (result.length < options.count && it.apothem <= options.maxDistance) {
                 var block = bot.blockAt(it.next());
                 if (options.predicate(block)) result.push(block);
             }
@@ -161,14 +222,14 @@ function init(mineflayer) {
         function findBlock(options, callback) {
             options = optionsWithDefaults(options);
 
-            var it = new BlockIterator(options.point);
+            var it = new CubeIterator(options.point);
             var result = [];
             var lastTick = new Date();
 
             next();
 
             function next() {
-                if (result.length >= options.count || it.distance > options.maxDistance) {
+                if (result.length >= options.count || it.apothem > options.maxDistance) {
                     return callback(null, result);
                 }
 
