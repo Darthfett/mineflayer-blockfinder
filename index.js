@@ -1,5 +1,6 @@
 var assert = require('assert');
 var fs = require('fs');
+var abs = Math.abs;
 
 module.exports = init;
 
@@ -157,6 +158,46 @@ function init(mineflayer) {
             return point;
         }
 
+        function OctahedronIterator(center) {
+            this.center = center.floored();
+            this.apothem = 1;
+            this.x = -1;
+            this.y = -1;
+            this.z = -1;
+            this.L = this.apothem;
+            this.R = this.L + 1;
+        }
+
+        OctahedronIterator.prototype.next = function() {
+            this.R -= 1;
+            if (this.R < 0) {
+                this.L -= 1;
+                if (this.L < 0) {
+                    this.z += 2;
+                    if (this.z > 1) {
+                        this.y += 2;
+                        if (this.y > 1) {
+                            this.x += 2;
+                            if (this.x > 1) {
+                                this.apothem += 1;
+                                this.x = -1;
+                            }
+                            this.y = -1;
+                        }
+                        this.z = -1;
+                    }
+                    this.L = this.apothem;
+                }
+                this.R = this.L;
+            }
+            var X = this.x * this.R;
+            var Y = this.y * (this.apothem - this.L);
+            var Z = this.z * (this.apothem - abs(abs(X) + abs(Y)));
+            var offset = vec3(X, Y, Z);
+            var point = offset.plus(this.center);
+            return point;
+        }
+
         function createBlockTypeMatcher(blockType) {
             return function(block) {
                 return block == null ? false : blockType === block.type;
@@ -208,7 +249,7 @@ function init(mineflayer) {
         function findBlockSync(options) {
             options = optionsWithDefaults(options);
 
-            var it = new CubeIterator(options.point);
+            var it = new OctahedronIterator(options.point);
             var result = [];
 
             while (result.length < options.count && it.apothem <= options.maxDistance) {
@@ -222,7 +263,7 @@ function init(mineflayer) {
         function findBlock(options, callback) {
             options = optionsWithDefaults(options);
 
-            var it = new CubeIterator(options.point);
+            var it = new OctahedronIterator(options.point);
             var result = [];
             var lastTick = new Date();
 
