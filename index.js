@@ -4,7 +4,7 @@ var abs = Math.abs;
 
 module.exports = init;
 
-var MAX_CPU_SPIN = 100;
+var MAX_CPU_SPIN = 10;
 var vec3;
 
 function init(mineflayer) {
@@ -278,7 +278,7 @@ function init(mineflayer) {
                 if (options.predicate(block)) result.push(block);
                 var cpuSpinTime = new Date() - lastTick;
                 if (cpuSpinTime > MAX_CPU_SPIN) {
-                    process.nextTick(function() {
+                    setImmediate(function() {
                         lastTick = new Date();
                         next();
                     });
