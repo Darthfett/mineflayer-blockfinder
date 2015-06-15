@@ -1,6 +1,18 @@
 var mineflayer = require('mineflayer');
-var blockFinderPlugin = require('mineflayer-blockfinder')(mineflayer);
-var bot = mineflayer.createBot({username: 'Player'});
+var blockFinderPlugin = require('..')(mineflayer);
+if(process.argv.length<3 || process.argv.length>5)
+{
+  console.log("Usage : node diamondFinder.js <host> <port> [<name>] [<password>]");
+  process.exit(1);
+}
+var bot = mineflayer.createBot({
+  username: process.argv[4] ? process.argv[4] : "diamondFinder",
+  viewDistance: "tiny",
+  verbose: true,
+  port:parseInt(process.argv[3]),
+  host:process.argv[2],
+  password:process.argv[5]
+});
 
 // Install the plugin
 blockFinderPlugin(bot);
@@ -14,12 +26,13 @@ bot.once('spawn', function() {
     count: 1,
   }, function(err, blockPoints) {
     if (err) {
-      return bot.chat('Error trying to find Diamond Ore: ' + err);
+      bot.chat('Error trying to find Diamond Ore: ' + err);
       bot.quit('quitting');
       return;
     }
     if (blockPoints.length) {
-      bot.chat('I found a Diamond Ore block at ' + blockPoints[0] + '.');
+      console.log(blockPoints[0].position);
+      bot.chat('I found a Diamond Ore block at ' + blockPoints[0].position + '.');
       bot.quit('quitting');
       return;
     } else {
