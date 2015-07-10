@@ -21,14 +21,14 @@ bot.once('spawn', function() {
     matching: 56,
     maxDistance: 256,
     count: 1,
-  }, function(err, blockPoints) {
+  }, function(err, blocks) {
     if (err) {
       return bot.chat('Error trying to find Diamond Ore: ' + err);
       bot.quit('quitting');
       return;
     }
-    if (blockPoints.length) {
-      bot.chat('I found a Diamond Ore block at ' + blockPoints[0] + '.');
+    if (blocks.length) {
+      bot.chat('I found a Diamond Ore block at ' + blocks[0].position + '.');
       bot.quit('quitting');
       return;
     } else {
