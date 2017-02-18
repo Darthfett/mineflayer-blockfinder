@@ -20,11 +20,9 @@
   "author": "Darthfett",
   "license": "MIT",
   "dependencies": {
-    "mineflayer": "^2.1.0"
+    "mineflayer": "^2.1.0",
+    "vec3": "^0.1.3"
   },
   "readmeFilename": "README.md",
-  "gitHead": "a2f8d6963512aa00d0dc4693badb74fa908976b4",
-  "dependencies": {
-    "vec3": "^0.1.3"
-  }
+  "gitHead": "a2f8d6963512aa00d0dc4693badb74fa908976b4"
 }
