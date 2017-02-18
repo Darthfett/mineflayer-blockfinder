@@ -2,7 +2,7 @@
 
 A library to help your mineflayer bot find blocks in the 3D world.
 
-See [mineflayer](https://github.com/superjoe30/mineflayer/).
+See [mineflayer](https://github.com/PrismarineJS/mineflayer).
 
 ## Usage
 
@@ -40,6 +40,30 @@ bot.once('spawn', function() {
 });
 ```
 
+## Dependencies
+
+ * [Mineflayer](https://github.com/PrismarineJS/mineflayer)
+
+## Installation
+
+`npm install mineflayer-blockfinder`
+
+Or clone and cd into the directory
+
+`npm install .`
+
+Windows: You will need to install:
+
+ * Visual C++ 2015 build tools: http://landinghub.visualstudio.com/visual-cpp-build-tools
+
+ * A version of Visual Studio: https://www.visualstudio.com/vs/community/
+
+ * An older version of OpenSSL (bitness needs to match your installation of nodejs)
+
+   ** 64-bit: http://slproweb.com/download/Win64OpenSSL-1_0_2k.exe
+
+   ** 32-bit: http://slproweb.com/download/Win32OpenSSL-1_0_2k.exe
+
 ## Documentation
 
 ### bot.findBlock(options, callback)
@@ -62,6 +86,10 @@ Finds the nearest block(s) to the given point synchronously.
  * `options` - See `bot.findBlock`.
 
 ## History
+
+### 0.0.6
+
+ * Fix recursion issue (thanks to rom1504)
 
 ### 0.0.5
 
