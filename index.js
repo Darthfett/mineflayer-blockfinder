@@ -5,11 +5,9 @@ var abs = Math.abs;
 module.exports = init;
 
 var MAX_CPU_SPIN = 10;
-var vec3;
+var vec3=require('vec3');
 
-function init(mineflayer) {
-
-    vec3 = mineflayer.vec3;
+function init() {
 
     function inject(bot) {
 

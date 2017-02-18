@@ -23,5 +23,8 @@
     "mineflayer": "^2.1.0"
   },
   "readmeFilename": "README.md",
-  "gitHead": "a2f8d6963512aa00d0dc4693badb74fa908976b4"
+  "gitHead": "a2f8d6963512aa00d0dc4693badb74fa908976b4",
+  "dependencies": {
+    "vec3": "^0.1.3"
+  }
 }
