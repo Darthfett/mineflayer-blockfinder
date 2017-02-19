@@ -89,6 +89,10 @@ Finds the nearest block(s) to the given point synchronously.
 
 ## History
 
+### 0.0.7
+
+ * DiamondFinder tested working, fix another issue related to recursion.
+
 ### 0.0.6
 
  * Fix recursion issue (thanks to rom1504)
