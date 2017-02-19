@@ -54,6 +54,8 @@ Or clone and cd into the directory
 
 Windows: You will need to install:
 
+ * Python 2.5+ (but < 3.0): https://www.python.org/downloads/
+
  * Visual C++ 2015 build tools: http://landinghub.visualstudio.com/visual-cpp-build-tools
 
  * A version of Visual Studio: https://www.visualstudio.com/vs/community/

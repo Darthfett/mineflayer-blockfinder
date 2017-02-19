@@ -262,30 +262,18 @@ function init() {
             options = optionsWithDefaults(options);
 
             var it = new OctahedronIterator(options.point);
+            
             var result = [];
-            var lastTick = new Date();
-
-            next();
-
-            function next() {
-                if (result.length >= options.count || it.apothem > options.maxDistance) {
-                    return callback(null, result);
+            setImmediate(function() {
+                while (result.length < options.count && it.apothem <= options.maxDistance) {
+                    var block = bot.blockAt(it.next());
+                    
+                    if (options.predicate(block)) result.push(block);
                 }
-
-                var block = bot.blockAt(it.next());
-                if (options.predicate(block)) result.push(block);
-                var cpuSpinTime = new Date() - lastTick;
-                if (cpuSpinTime > MAX_CPU_SPIN) {
-                    setImmediate(function() {
-                        lastTick = new Date();
-                        next();
-                    });
-                    return;
-                } else {
-                    next();
-                }
-            }
+                return callback(null, result);
+            });
         }
+        
     }
     return inject;
 }
