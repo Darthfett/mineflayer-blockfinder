@@ -79,7 +79,7 @@ Finds the nearest block(s) to the given point.
  * `callback` - A callback function to get the result.  Function signature:
 
 ```
-function(err, arrayOfPoints)
+function(err, arrayOfBlocks)
 ```
 
 ### bot.findBlockSync(options)
