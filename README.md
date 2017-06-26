@@ -12,7 +12,7 @@ var blockFinderPlugin = require('mineflayer-blockfinder')(mineflayer);
 var bot = mineflayer.createBot({username: 'Player'});
 
 // Install the plugin
-blockFinderPlugin(bot);
+bot.loadPlugin(blockFinderPlugin);
 
 // Sample usage
 bot.once('spawn', function() {
