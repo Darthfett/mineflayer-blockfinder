@@ -15,7 +15,7 @@ var bot = mineflayer.createBot({
 });
 
 // Install the plugin
-blockFinderPlugin(bot);
+bot.loadPlugin(blockFinderPlugin);
 
 // Sample usage
 bot.once('spawn', function() {
